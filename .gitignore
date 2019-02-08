@@ -1,0 +1,7 @@
+*.txt
+**/corpus
+**/output
+**/out
+**/idea
+*.idea
+*.iml
