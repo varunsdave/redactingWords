@@ -15,7 +15,12 @@ import java.util.stream.Stream;
  * @author Varun Dave
  */
 public class WordsRedactor {
+    FilesUtility<String> filesUtility;
+    public WordsRedactor(FilesUtility<String> fileUtility) {
+        this.filesUtility = fileUtility;
+    }
 
+    private Pattern wordPattern = Pattern.compile("(?<=\\w)(?=\\W)|(?<=\\W)(?=\\w)");
     public void run(String[] args) {
         String keyWordsListFile = args[0];
         String inputFolderPath = args[1];
@@ -27,7 +32,7 @@ public class WordsRedactor {
 
         Set<String> redactingWordsSet = WordsLookupTable
                 .generateReactingWordsSet(
-                        new UnixStringFilesUtil().readFileAsLines(keyWordFilePath));
+                        this.filesUtility.readFileAsLines(keyWordFilePath));
         try (Stream<Path> filePathStream = Files.walk(Paths.get(inputFolderPath))) {
             filePathStream.forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
@@ -39,9 +44,18 @@ public class WordsRedactor {
         }
     }
 
+    /**
+     * Attempts to read in text file based on a given path using a
+     * unix string files util.
+     *
+     * It can be extended to use a build in filesUtil class as a dependency
+     * instead
+     * @param fileName
+     * @return
+     */
     public String readTextFile(Path fileName) {
         try {
-            return new UnixStringFilesUtil().readFile(fileName);
+            return this.filesUtility.readFile(fileName);
         } catch (Exception e) {
             return null;
         }
@@ -55,7 +69,7 @@ public class WordsRedactor {
         }
         try {
             Path outputPath = Paths.get(outputFolderPath + fileName);
-            new UnixStringFilesUtil().writeFile(outputPath, content);
+            this.filesUtility.writeFile(outputPath, content);
         } catch (Exception e) {
             System.out.println("File: " + fileName + " was not written. Error:"  + e.getMessage());
         }
@@ -64,8 +78,8 @@ public class WordsRedactor {
 
 
     public String redactWords(String input, Set<String> wordsToRedact) {
-        Pattern p = Pattern.compile("(?<=\\w)(?=\\W)|(?<=\\W)(?=\\w)");
-        String [] words = p.split(input);
+//        Pattern p = Pattern.compile("(?<=\\w)(?=\\W)|(?<=\\W)(?=\\w)");
+        String [] words = wordPattern.split(input);
         StringBuilder sb = new StringBuilder();
         for (String word: words) {
             if (wordsToRedact.contains(word.toLowerCase())) {

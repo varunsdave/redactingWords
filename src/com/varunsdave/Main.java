@@ -1,4 +1,5 @@
 package com.varunsdave;
+import com.varunsdave.WordsRedactor.UnixStringFilesUtil;
 import com.varunsdave.WordsRedactor.WordsRedactor;
 
 import java.nio.file.Files;
@@ -13,7 +14,9 @@ public class Main {
 
     public static void main(String[] args) {
         if (isValidInputs(args)) {
-            new WordsRedactor().run(args);
+            new WordsRedactor(
+                    new UnixStringFilesUtil()
+            ).run(args);
         }
     }
 
